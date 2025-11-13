@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
+    "title": "Everprotec Verify Sessions",
+    "description": "This API enables you to create verification sessions and retrieve their status.",
     "license": {
       "name": "MIT"
     },
@@ -10,38 +10,47 @@
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "http://api.everprotec.com/v1"
     }
   ],
   "security": [
     {
-      "bearerAuth": []
+      "basicAuth": []
     }
   ],
   "paths": {
-    "/plants": {
+    "/website/{siteId}/invite/{inviteId}": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "description": "Returns the status and details of an invite for a verification session",
         "parameters": [
           {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
+            "name": "siteId",
+            "in": "path",
+            "description": "The ID of the site configuration. This can be found in the url for your website settings ![dashboard.everprotec.com/web/settings/your_site_ID_here](/images/site-id.png)",
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "inviteId",
+            "in": "path",
+            "description": "The ID of the verification session invite.",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Invite Status Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Plant"
+                    "$ref": "#/components/schemas/Invite"
                   }
                 }
               }
@@ -58,63 +67,43 @@
             }
           }
         }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/website/{siteId}/invite": {
+      "post": {
+        "description": "Creates a new verification session invite",
         "parameters": [
           {
-            "name": "id",
+            "name": "siteId",
             "in": "path",
-            "description": "ID of plant to delete",
+            "description": "The ID of the site configuration. This can be found in the url for your website settings ![dashboard.everprotec.com/web/settings/your_site_ID_here](/images/site-id.png)",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
+        "requestBody": {
+          "description": "You can add a custom ID to match invites against your internal user or verification session IDs",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvite"
+              }
+            }
+          }
+        },
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
+          "200": {
+            "description": "New Invite Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewInvite"
+                }
+              }
+            }
           },
           "400": {
             "description": "unexpected error",
@@ -125,28 +114,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
           }
         }
       }
@@ -154,41 +121,65 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "CreateInvite": {
         "type": "object",
         "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
+          "customId": {
+            "description": "Your internal ID for the user or verification session",
+            "type": "string",
+            "maxLength": "128"
           }
         }
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
+      "NewInvite": {
+        "required": [
+          "inviteId",
+          "url",
+          "expires"
+        ],
+        "type": "object",
+        "properties": {
+          "inviteId": {
+            "description": "The unique ID for the invite",
+            "type": "string"
           },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
+          "url": {
+            "description": "URL to the verification gateway for this invite",
+            "type": "string"
+          },
+          "expires": {
+            "description": "Unix timestamp in seconds for the invite expiration date. This is 24 hours from the creation date",
+            "type": "integer",
+            "format": "int32"
           }
-        ]
+        }
+      },
+      "Invite": {
+        "required": [
+          "inviteId",
+          "url",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "inviteId": {
+            "description": "The unique ID for the invite",
+            "type": "string"
+          },
+          "url": {
+            "description": "URL to the verification gateway for this invite",
+            "type": "string"
+          },
+          "customId": {
+            "description": "The ID that was provided to us by you when creating an invite",
+            "type": ["string", "null"]
+          },
+          "status": {
+            "description": "The status of the invite",
+            "type": "string",
+            "enum": ["pending", "verified", "expired"]
+          }
+        }
       },
       "Error": {
         "required": [
@@ -208,9 +199,9 @@
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
+      "basicAuth": {
         "type": "http",
-        "scheme": "bearer"
+        "scheme": "basic"
       }
     }
   }

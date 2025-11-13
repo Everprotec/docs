@@ -1,33 +1,23 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'API Introduction'
+description: 'Our API enables you to automatically generate links for our Age Verification Gateway to verify users from your website. In this documentation, you will find details on how to authenticate, create a verification session invitation link, and check the status of a verification session.'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Getting Started
 
-## Welcome
+Every request you make to our API will need to be authenticated. To maximize security, your credentials are configured on a per site basis. Follow the authentication guide [here](/api-reference/authentication)
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+To generate your first verification session invitation link, you will need to have a site configured in the [dashboard](https://dashboard.everprotec.com/web). The _siteId_, which is required for invite requests, can be found in the url to the settings page for your site.
 
+![dashboard.everprotec.com/web/settings/your_site_ID_here](/images/site-id.png)
+
+View the [Create Invitation](/api-reference/endpoint/create-invite) endpoint documentation to test your first API request and learn how to integrate with our API in your project.
+
+## OpenAPI
 <Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
+  title="Everprotec OpenAPI Specification"
+  icon="pen-to-square"
+  href="https://github.com/Everprotec/docs/blob/main/api-reference/openapi.json"
 >
-  View the OpenAPI specification file
+  All of our APIs are documented with OpenAPI spec. This link takes you to our openapi.json file for ingestion in your project.
 </Card>
-
-## Authentication
-
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
-
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
-```
